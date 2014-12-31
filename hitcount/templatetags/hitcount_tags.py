@@ -170,7 +170,7 @@ class GetHitCountJavascript(template.Node):
         from django.middleware.csrf import _get_new_csrf_key
 
         js = "$.post( '" + reverse('hitcount_update_ajax') + "'," + \
-             "\n\t{ hitcount_pk : '" + str(obj.pk) + ", csrfmiddlewaretoken : '" + \
+             "\n\t{ hitcount_pk : '" + str(obj.pk) + "', csrfmiddlewaretoken : '" + \
              _get_new_csrf_key() + "' },\n" + \
              "\tfunction(data, status) {\n" + \
              "\t\tif (data.status == 'error') {\n" + \
