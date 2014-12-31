@@ -160,19 +160,22 @@ class GetHitCountJavascript(template.Node):
     def __init__(self, object_expr):
         self.object_expr = object_expr
 
-
     def render(self, context):
         ctype, object_pk = get_target_ctype_pk(context, self.object_expr)
-        
-        obj, created = HitCount.objects.get_or_create(content_type=ctype, 
-                        object_pk=object_pk)
+        obj, created = HitCount.objects.get_or_create(
+            content_type=ctype,
+            object_pk=object_pk
+            )
 
-        js =    "$.post( '" + reverse('hitcount_update_ajax') + "',"   + \
-                "\n\t{ hitcount_pk : '" + str(obj.pk) + "' },\n"         + \
-                "\tfunction(data, status) {\n"                         + \
-                "\t\tif (data.status == 'error') {\n"                  + \
-                "\t\t\t// do something for error?\n"                   + \
-                "\t\t}\n\t},\n\t'json');"
+        from django.middleware.csrf import _get_new_csrf_key
+
+        js = "$.post( '" + reverse('hitcount_update_ajax') + "'," + \
+             "\n\t{ hitcount_pk : '" + str(obj.pk) + ", csrfmiddlewaretoken : '" + \
+             _get_new_csrf_key() + "' },\n" + \
+             "\tfunction(data, status) {\n" + \
+             "\t\tif (data.status == 'error') {\n" + \
+             "\t\t\t// do something for error?\n" + \
+             "\t\t}\n\t},\n\t'json');"
 
         return js
 
