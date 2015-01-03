@@ -166,18 +166,23 @@ class GetHitCountJavascript(template.Node):
             content_type=ctype,
             object_pk=object_pk
             )
-
-        from django.middleware.csrf import _get_new_csrf_key
-
-        js = "$.post( '" + reverse('hitcount_update_ajax') + "'," + \
-             "\n\t{ hitcount_pk : '" + str(obj.pk) + "', csrftoken : '" + \
-             _get_new_csrf_key() + "' },\n" + \
+        from django.middleware.csrf import get_token
+        js = "$.ajaxSetup({" + \
+             "\tbeforeSend: function(xhr, settings) {" + \
+             "\n\t\tif (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {" + \
+             "\n\t\t\txhr.setRequestHeader('X-CSRFToken', '"+get_token(context['request'])+"');" + \
+             "\n\t\t}" + \
+             "\n\t}" + \
+             "\n});\n\n" + \
+             "$.post( '" + reverse('hitcount_update_ajax') + "'," + \
+             "\n\t{ hitcount_pk : '" + str(obj.pk) + "' },\n" + \
              "\tfunction(data, status) {\n" + \
              "\t\tif (data.status == 'error') {\n" + \
              "\t\t\t// do something for error?\n" + \
              "\t\t}\n\t},\n\t'json');"
 
         return js
+
 
 def get_hit_count_javascript(parser, token):
     '''
@@ -187,14 +192,14 @@ def get_hit_count_javascript(parser, token):
 
     For example:
 
-    <script src="/media/js/jquery-latest.js" type="text/javascript"></script>
-    <script type="text/javascript"><!--
-    $(document).ready(function() {
-        {% get_hit_count_javascript for [object] %}
-    });
-    --></script> 
+    <!-- Script to Integrate Hitcount -->
+    <script src="{{ STATIC_URL }}jquery-1.11.1.min.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        $(document).ready(function() {
+            {% get_hit_count_javascript for object %}
+        });
+    </script>
     '''
     return GetHitCountJavascript.handle_token(parser, token)
 
 register.tag('get_hit_count_javascript', get_hit_count_javascript)
-

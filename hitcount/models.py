@@ -222,4 +222,3 @@ class BlacklistUserAgent(models.Model):
 
     def __unicode__(self):
         return u'%s' % self.user_agent
-

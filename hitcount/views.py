@@ -1,6 +1,5 @@
-import json as simplejson
+import json
 from django.http import Http404, HttpResponse, HttpResponseBadRequest
-# from django.utils import simplejson
 from django.conf import settings
 
 from hitcount.utils import get_ip
@@ -74,8 +73,13 @@ def _update_hit_count(request, hitcount):
 
 
 def json_error_response(error_message):
-    return HttpResponse(simplejson.dumps(dict(success=False,
-                                              error_message=error_message)))
+    return HttpResponse(
+        json.dumps(dict(
+            success=False,
+            error_message=error_message
+            )
+        ))
+
 
 # TODO better status responses - consider model after django-voting,
 # right now the django handling isn't great.  should return the current
@@ -98,7 +102,6 @@ def update_hit_count_ajax(request):
         return json_error_response("Hits counted via POST only.")
 
     hitcount_pk = request.POST.get('hitcount_pk')
-
     try:
         hitcount = HitCount.objects.get(pk=hitcount_pk)
     except:
@@ -111,5 +114,4 @@ def update_hit_count_ajax(request):
     else:
         status = "no hit recorded"
 
-    json = simplejson.dumps({'status': status})
-    return HttpResponse(json, mimetype="application/json")
+    return HttpResponse(json.dumps({'status': status}), content_type="application/json")
